@@ -12,7 +12,7 @@ export default {
 </script>
 
 <style>
-
+#app{
+  height: 100%;
+}
 </style>
-git config --global user.email "you@example.com"
-  git config --global user.name "Your Name"
