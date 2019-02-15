@@ -24,20 +24,17 @@ export default {
     };
   },
   methods: {
-    handleLogin() {
-      this.$http.post(`login`, this.formdata)
-      .then((res) => {
-          console.log(res);
-          const {data:{data,meta:{msg,status}}}=res;
-          if(status===200){
-              console.log('yes!!!!')
+    async  handleLogin() {
+     const res = await this.$http.post(`login`, this.formdata)
+      const {data:{data:{token},meta:{msg,status}}}=res;
+      if(status===200){
+            localStorage.setItem('token',token);
+            this.$router.push({
+                name:"home"
+            })
           }else{
               this.$message.error(msg);
           }
-      })
-      .catch(err => {
-          console.log(err);
-      });
     }
   }
 };
