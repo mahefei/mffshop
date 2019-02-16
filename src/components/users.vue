@@ -10,15 +10,21 @@
     <el-row class="search">
       <el-col>
         <!-- 输入框 -->
-        <el-input placeholder="请输入内容" v-model="query" class="inputself">
-          <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-input
+          placeholder="请输入内容"
+          v-model="query"
+          class="inputself"
+          clearable
+          @clear="getallusers()"
+        >
+          <el-button slot="append" icon="el-icon-search" @click="searchuser()"></el-button>
         </el-input>
         <!-- 按钮 -->
-        <el-button type="success">添加用户</el-button>
+        <el-button type="success" @click="showtable()">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
-    <el-table :data="list" style="width: 100%">
+    <el-table height="350px" :data="list" style="width: 100%">
       <el-table-column prop="id" label="#" width="120"></el-table-column>
       <el-table-column prop="username" label="姓名" width="160"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
@@ -31,7 +37,7 @@
           <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
         </template>
       </el-table-column>
-      <el-table-column  label="操作" width="240">
+      <el-table-column label="操作" width="240">
         <template>
           <el-button type="primary" icon="el-icon-edit" circle plain></el-button>
           <el-button type="success" icon="el-icon-check" circle plain></el-button>
@@ -40,6 +46,36 @@
       </el-table-column>
     </el-table>
     <!-- 分页 -->
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pagenum"
+      :page-sizes="[2, 4, 6, 8]"
+      :page-size="2"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total"
+    ></el-pagination>
+    <!-- 对话框 -->
+    <el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd">
+      <el-form label-position="left" label-width="80px" :model="formdata">
+        <el-form-item label="用户名">
+          <el-input v-model="formdata.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="formdata.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱">
+          <el-input v-model="formdata.email"></el-input>
+        </el-form-item>
+        <el-form-item label="电话">
+          <el-input v-model="formdata.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisibleAdd = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -50,13 +86,45 @@ export default {
       query: "",
       pagenum: 1,
       pagesize: 2,
-      list: []
+      list: [],
+      total: -1,
+      dialogFormVisibleAdd: false,
+      formdata:{
+          username:"",
+          password:"",
+          email:"",
+          mobile:""
+      }
     };
   },
   created() {
     this.getTableData();
   },
   methods: {
+    //   显示对话框
+    showtable(){
+        this.dialogFormVisibleAdd=true;
+    },
+    getallusers() {
+      this.getTableData();
+    },
+    //   搜索用户
+    searchuser() {
+      this.pagenum = 1;
+      this.getTableData();
+    },
+    //   分页的方法
+    handleSizeChange(val) {
+      console.log(`每页 ${val} 条`);
+      this.pagenum = 1;
+      this.pagesize = val;
+      this.getTableData();
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+      this.pagenum = val;
+      this.getTableData();
+    },
     //   获取表格数据
     async getTableData() {
       const AUTH_TOKEN = localStorage.getItem("token");
@@ -71,8 +139,9 @@ export default {
         meta: { msg, status }
       } = res.data;
       if (status === 200) {
+        this.total = data.total;
         this.list = data.users;
-        console.log(this.list);
+        console.log(res);
       }
     }
   }
