@@ -104,7 +104,7 @@
       </el-aside>
       <el-main class="main">
         <router-view>
-          
+
         </router-view>
       </el-main>
     </el-container>
@@ -142,7 +142,7 @@ export default {
   background-color: white;
 }
 .main {
-  background-color: yellowgreen;
+  background-color: gray;
 }
 .middle {
   line-height: 60px;

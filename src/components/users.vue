@@ -14,21 +14,51 @@
           <el-button slot="append" icon="el-icon-search"></el-button>
         </el-input>
         <!-- 按钮 -->
-        <el-button type="success">搜索</el-button>
+        <el-button type="success">添加用户</el-button>
       </el-col>
     </el-row>
     <!-- 表格 -->
+    <el-table :data="list" style="width: 100%">
+      <el-table-column prop="id" label="#" width="120"></el-table-column>
+      <el-table-column prop="username" label="姓名" width="160"></el-table-column>
+      <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
+      <el-table-column prop="mobile" label="电话" width="180"></el-table-column>
+      <el-table-column prop="create_time" label="创建日期" width="180"></el-table-column>
+      <el-table-column prop="name" label="用户状态" width="180"></el-table-column>
+      <el-table-column prop="name" label="操作" width="240"></el-table-column>
+    </el-table>
     <!-- 分页 -->
   </el-card>
 </template>
 
 <script>
 export default {
-    data(){
-        return {
-            query:''
-        }
+  data() {
+    return {
+      query: "",
+      pagenum:1,
+      pagesize:2,
+      list:[]
+    };
+  },
+  created(){
+      this.getTableData();
+  },
+  methods:{
+      
+    //   获取表格数据
+    async getTableData(){
+        const AUTH_TOKEN = localStorage.getItem('token');
+        this.$http.defaults.headers.common['Authorization']=AUTH_TOKEN;
+      const res = await  this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
+      const {data,meta:{msg,status}} = res.data;
+      if(status===200){
+          this.list= data.users;
+          console.log(this.list)
+      }
     }
+  }
+  
 };
 </script>
 
@@ -36,10 +66,10 @@ export default {
 .box {
   height: 100%;
 }
-.search{
-    padding-top: 20px;
+.search {
+  padding-top: 20px;
 }
-.inputself{
-    width: 400px;
+.inputself {
+  width: 400px;
 }
 </style>
