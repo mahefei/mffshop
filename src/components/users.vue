@@ -24,12 +24,20 @@
       <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
       <el-table-column prop="mobile" label="电话" width="180"></el-table-column>
       <el-table-column label="创建日期" width="180">
-          <template slot-scope="scope">
-              {{scope.row.create_time | fmtdate}}
-          </template>
+        <template slot-scope="scope">{{scope.row.create_time | fmtdate}}</template>
       </el-table-column>
-      <el-table-column prop="name" label="用户状态" width="180"></el-table-column>
-      <el-table-column prop="name" label="操作" width="240"></el-table-column>
+      <el-table-column label="用户状态" width="180">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column  label="操作" width="240">
+        <template>
+          <el-button type="primary" icon="el-icon-edit" circle plain></el-button>
+          <el-button type="success" icon="el-icon-check" circle plain></el-button>
+          <el-button type="danger" icon="el-icon-delete" circle plain></el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
   </el-card>
@@ -40,29 +48,34 @@ export default {
   data() {
     return {
       query: "",
-      pagenum:1,
-      pagesize:2,
-      list:[]
+      pagenum: 1,
+      pagesize: 2,
+      list: []
     };
   },
-  created(){
-      this.getTableData();
+  created() {
+    this.getTableData();
   },
-  methods:{
-      
+  methods: {
     //   获取表格数据
-    async getTableData(){
-        const AUTH_TOKEN = localStorage.getItem('token');
-        this.$http.defaults.headers.common['Authorization']=AUTH_TOKEN;
-      const res = await  this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
-      const {data,meta:{msg,status}} = res.data;
-      if(status===200){
-          this.list= data.users;
-          console.log(this.list)
+    async getTableData() {
+      const AUTH_TOKEN = localStorage.getItem("token");
+      this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
+      const res = await this.$http.get(
+        `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
+          this.pagesize
+        }`
+      );
+      const {
+        data,
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
+        this.list = data.users;
+        console.log(this.list);
       }
     }
   }
-  
 };
 </script>
 
