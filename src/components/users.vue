@@ -6,6 +6,7 @@
       <el-breadcrumb-item>用户管理</el-breadcrumb-item>
       <el-breadcrumb-item>用户列表</el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- <card-bread level1="权限管理" level2="权限列表"></card-bread> -->
     <!-- 搜索添加 -->
     <el-row class="search">
       <el-col>
@@ -282,8 +283,6 @@ export default {
     },
     //   获取表格数据
     async getTableData() {
-      const AUTH_TOKEN = localStorage.getItem("token");
-      this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
       const res = await this.$http.get(
         `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
           this.pagesize
