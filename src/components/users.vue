@@ -34,14 +34,31 @@
       </el-table-column>
       <el-table-column label="用户状态" width="180">
         <template slot-scope="scope">
-          <el-switch v-model="scope.row.mg_state" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <el-switch
+            @change="changestate(scope.row)"
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="240">
         <template slot-scope="scope">
-          <el-button type="primary" @click="showedittable(scope.row)"  icon="el-icon-edit" circle plain></el-button>
-          <el-button type="success" icon="el-icon-check" circle plain></el-button>
-          <el-button type="danger"  @click="showmsgbox(scope.row)"  icon="el-icon-delete" circle plain></el-button>
+          <el-button
+            type="primary"
+            @click="showedittable(scope.row)"
+            icon="el-icon-edit"
+            circle
+            plain
+          ></el-button>
+          <el-button type="success" @click="showsetrole(scope.row)" icon="el-icon-check" circle plain></el-button>
+          <el-button
+            type="danger"
+            @click="showmsgbox(scope.row)"
+            icon="el-icon-delete"
+            circle
+            plain
+          ></el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -95,6 +112,28 @@
         <el-button type="primary" @click="editusers()">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 设置角色对话框 -->
+    <!-- {{selectVal}} -->
+    <el-dialog title="设置角色" :visible.sync="dialogFormVisiblerole">
+      <el-form :model="formdata" label-position="left" label-width="80px" >
+        <el-form-item label="用户名" >
+          {{formdata.username}}
+        </el-form-item>
+        <el-form-item label="角色" >
+          <el-select v-model="selectVal" placeholder="请选择">
+            <el-option label="请选择" disabled :value="selectVal"></el-option>
+            <el-option v-for="(item,i) in roles" :key="item.id"
+            :label="item.roleName"  :value="item.id" 
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisiblerole = false">取 消</el-button>
+        <el-button type="primary" @click="setrole()">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-card>
 </template>
 
@@ -108,71 +147,118 @@ export default {
       list: [],
       total: -1,
       dialogFormVisibleAdd: false,
-      dialogFormVisibleEdit:false,
-      formdata:{
-          username:"",
-          password:"",
-          email:"",
-          mobile:""
-      }
+      dialogFormVisibleEdit: false,
+      dialogFormVisiblerole:false,
+      formdata: {
+        username: "",
+        password: "",
+        email: "",
+        mobile: ""
+      },
+      // 分配角色数据
+      selectVal:-1,
+      roles:[],
+      roleid:1
     };
   },
   created() {
     this.getTableData();
   },
   methods: {
+    // 发送请求修改角色
+    async setrole(){
+      const res = await this.$http.put(`users/${this.roleid}/role`,{rid:this.selectVal});
+       const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
+        this.dialogFormVisiblerole=false;
+      }
+    },
+    // 显示设置对话框
+    async showsetrole(user) {
+      this.formdata.username=user.username;
+      this.roleid=user.id;
+      this.dialogFormVisiblerole=true;
+      const res = await this.$http.get(`roles`);
+      this.roles=res.data.data;
+      const res2 = await this.$http.get(`users/${user.id}`);
+      this.selectVal=res2.data.data.rid;
+      
+      console.log(res2.data);
+    },
+
+    // 改变用户状态
+    async changestate(user) {
+      console.log(user);
+      const res = await this.$http.put(
+        `users/${user.id}/state/${user.mg_state}`
+      );
+      console.log(res);
+    },
     // 发送编辑请求
-    async editusers(){
-      const res= await this.$http.put(`users/${this.formdata.id}`,this.formdata);
-      const{meta:{msg,status}} = res.data;
-          if(status===200){
-            this.$message.success(msg);
-            this.getTableData();
-            this.dialogFormVisibleEdit=false;
- };
+    async editusers() {
+      const res = await this.$http.put(
+        `users/${this.formdata.id}`,
+        this.formdata
+      );
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
+        this.$message.success(msg);
+        this.getTableData();
+        this.dialogFormVisibleEdit = false;
+      }
     },
     // 显示编辑对话框
-    showedittable(user){
-      this.formdata=user
-      this.dialogFormVisibleEdit=true;
+    showedittable(user) {
+      this.formdata = user;
+      this.dialogFormVisibleEdit = true;
     },
 
     // 显示删除弹出框
-    showmsgbox(user){
-       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(async () => {
+    showmsgbox(user) {
+      this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      })
+        .then(async () => {
           const res = await this.$http.delete(`users/${user.id}`);
-          const{meta:{msg,status}} = res.data;
-          if(status===200){
+          const {
+            meta: { msg, status }
+          } = res.data;
+          if (status === 200) {
             this.$message.success(msg);
-            this.pagenum=1;
+            this.pagenum = 1;
             this.getTableData();
-          };
-          this.$message.success('删除成功!');
-        }).catch(() => {
+          }
+          this.$message.success("删除成功!");
+        })
+        .catch(() => {
           this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
+            type: "info",
+            message: "已取消删除"
+          });
         });
     },
     // 添加用户
-    async addusers(){
-      const res=await this.$http.post(`users`,this.formdata);
+    async addusers() {
+      const res = await this.$http.post(`users`, this.formdata);
       console.log(res);
-      const{meta:{msg,status}} = res.data;
-      if(status===201){
-        this.dialogFormVisibleAdd=false;
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 201) {
+        this.dialogFormVisibleAdd = false;
         this.getTableData();
       }
     },
     //   显示对话框
-    showtable(){
-        this.dialogFormVisibleAdd=true;
-        this.formdata={};
+    showtable() {
+      this.dialogFormVisibleAdd = true;
+      this.formdata = {};
     },
     getallusers() {
       this.getTableData();
