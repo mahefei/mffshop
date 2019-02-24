@@ -63,13 +63,13 @@
                 </el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group>
-                <el-menu-item index="1-1">
+                <el-menu-item index="params">
                   <i class="el-icon-menu"></i>
                   <span>分类参数</span>
                 </el-menu-item>
               </el-menu-item-group>
               <el-menu-item-group>
-                <el-menu-item index="1-1">
+                <el-menu-item index="categories">
                   <i class="el-icon-menu"></i>
                   <span>商品分类</span>
                 </el-menu-item>
